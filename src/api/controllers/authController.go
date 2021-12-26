@@ -11,6 +11,34 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Claims struct {
+	jwt.StandardClaims
+}
+
+func User(c *fiber.Ctx) error {
+	// CookieからJWTを取得
+	cookie := c.Cookies("jwt") // Loginで保存したもの
+	// token取得
+	token, err := jwt.ParseWithClaims(cookie, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+	if err != nil || !token.Valid {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "unauthenticated",
+		})
+	}
+
+	claims := token.Claims.(*Claims)
+	// User IDを取得
+	id := claims.Issuer
+
+	var user models.User
+	database.DB.Where("id = ?", id).First(&user)
+
+	return c.JSON(user)
+}
+
 func Register(c *fiber.Ctx) error {
 	var data map[string]string
 
@@ -83,8 +111,31 @@ func Login(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
+	// Cookie
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24),
+		HTTPOnly: true,
+	}
+	c.Cookie(&cookie)
+
 	return c.JSON(fiber.Map{
 		"jwt": token,
 	})
 
+}
+
+func Logout(c *fiber.Ctx) error {
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",                         // tokenを空にする
+		Expires:  time.Now().Add(-time.Hour), // マイナス値を入れて期限切れ
+		HTTPOnly: true,
+	}
+
+	c.Cookie(&cookie)
+	return c.JSON(fiber.Map{
+		"message": "success",
+	})
 }
