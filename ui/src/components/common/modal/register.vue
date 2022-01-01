@@ -7,55 +7,52 @@
     <div v-if="is_success">
       <p v-html="message"></p>
     </div>
-    <div class="modal_form" v-if="!is_success">
-      ニックネーム
-      <input
-        type="text"
-        name="su_nickname"
-        class="su_nickname"
-        v-model="user_nickname"
-      />
-      メールアドレス
-      <input
-        type="email"
-        name="su_email"
-        class="su_email"
-        v-model="user_email"
-      />
-      パスワード<br />
-      <input
-        type="password"
-        name="su_password"
-        class="su_password"
-        v-model="user_password"
-      />
-      パスワード確認<br />
-      <input
-        type="password"
-        name="su_password_conf"
-        class="su_password_conf"
-        v-model="user_confirm_password"
-      />
+    <form @submit.prevent="submit">
+      <div class="modal_form" v-if="!is_success">
+        ニックネーム
+        <input
+          type="text"
+          name="su_nickname"
+          class="su_nickname"
+          v-model="nick_name"
+        />
+        メールアドレス
+        <input type="email" name="su_email" class="su_email" v-model="email" />
+        パスワード<br />
+        <input
+          type="password"
+          name="su_password"
+          class="su_password"
+          v-model="password"
+        />
+        パスワード確認<br />
+        <input
+          type="password"
+          name="su_password_conf"
+          class="su_password_conf"
+          v-model="confirm_password"
+        />
 
-      <div class="center">
-        <button
-          class="btn01"
-          @click="submit_registration()"
-          v-bind:class="{ signup_btn: !condition_agree }"
-        >
-          新規登録
-        </button>
+        <div class="center">
+          <button
+            class="btn01"
+            type="submit"
+            v-bind:class="{ signup_btn: !condition_agree }"
+          >
+            新規登録
+          </button>
+        </div>
+        <hr class="dot_g" />
+        <div class="center">
+          <button class="btn02" v-on:click="$emit('modal_change', 'login')">
+            ログイン
+          </button>
+        </div>
       </div>
-      <hr class="dot_g" />
-      <div class="center">
-        <button class="btn02" v-on:click="$emit('modal_change', 'login')">
-          ログイン
-        </button>
-      </div>
-    </div>
+    </form>
     <div class="close_btn">
       <img
-        src="/img/components/common/modal/close.png"
+        src="@/assets/img/close.png"
         class="finger"
         v-on:click="$emit('modal_off')"
       />
@@ -64,14 +61,17 @@
   </div>
 </template>
 <script>
+import { ref } from "vue";
+import axios from "axios";
+import Loader from "@/components/common/layer/loader.vue";
+
 export default {
+  components: {
+    Loader,
+  },
   data() {
     return {
       condition_agree: false,
-      user_email: "",
-      user_nickname: "",
-      user_password: "",
-      user_confirm_password: "",
       errors: [],
       message: "",
       show_error: false,
@@ -179,6 +179,38 @@ export default {
     //   console.log(e);
     // },
   },
+
+  setup(props, context) {
+    // v-modelからフォームに入力された値を格納
+    const nick_name = ref("");
+    const email = ref("");
+    const password = ref("");
+    const confirm_password = ref("");
+    const nowLoading = ref(false);
+
+    const submit = async () => {
+      nowLoading.value = true;
+      // Register apiへPOSTリクエスト
+      await axios.post("register", {
+        nick_name: nick_name.value,
+        email: email.value,
+        password: password.value,
+        password_confirm: confirm_password.value,
+      });
+      nowLoading.value = false;
+      // モーダルを消す
+      await context.emit("modal_off");
+    };
+
+    return {
+      nick_name,
+      email,
+      password,
+      confirm_password,
+      nowLoading,
+      submit,
+    };
+  },
 };
 </script>
 <style scoped>
@@ -214,6 +246,7 @@ ul#error_message {
   position: absolute;
   top: 0px;
   right: 0px;
+  cursor: pointer;
 }
 
 .close_btn img {
