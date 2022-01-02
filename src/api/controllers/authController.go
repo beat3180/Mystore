@@ -46,12 +46,24 @@ func Register(c *fiber.Ctx) error {
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
+	//DBのユーザーデータ
+	var users models.User
+
+	// emailに紐づくユーザーを取得
+	// &userを指定することでDBから取得したデータを直接格納できる
+	database.DB.Where("email = ?", data["email"]).First(&users)
+	if users.Email == data["email"] {
+		c.Status(400)
+		return c.JSON(fiber.Map{
+			"message": "このメールアドレスは既に使われています",
+		})
+	}
 
 	// パスワードチェック
 	if data["password"] != data["password_confirm"] {
 		c.Status(400)
 		return c.JSON(fiber.Map{
-			"message": "Passwords do not match!",
+			"message": "パスワードが一致しません",
 		})
 	}
 
@@ -87,7 +99,7 @@ func Login(c *fiber.Ctx) error {
 	if user.ID == 0 {
 		c.Status(404)
 		return c.JSON(fiber.Map{
-			"message": "User not found",
+			"message": "ユーザーが見つかりません",
 		})
 	}
 
@@ -95,7 +107,7 @@ func Login(c *fiber.Ctx) error {
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
 		c.Status(404)
 		return c.JSON(fiber.Map{
-			"message": "Incorrect password",
+			"message": "パスワードが間違っています",
 		})
 	}
 

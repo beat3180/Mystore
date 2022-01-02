@@ -1,11 +1,15 @@
 <template>
   <div>
     <span class="bold">新規登録</span>
-    <ul id="error_message" v-if="!is_success && show_error">
-      <li v-for="(error, key) in errors" :key="key">{{ error }}</li>
+    <ul id="error_message" v-if="submit_flag === true">
+      <li>{{ errors.nick_name }}</li>
+      <li>{{ errors.email }}</li>
+      <li>{{ errors.password }}</li>
+      <li>{{ errors.confirm_password }}</li>
+      <li>{{ error_message }}</li>
     </ul>
     <div v-if="is_success">
-      <p v-html="message"></p>
+      <p>会員登録が完了しました</p>
     </div>
     <form @submit.prevent="submit">
       <div class="modal_form" v-if="!is_success">
@@ -34,13 +38,7 @@
         />
 
         <div class="center">
-          <button
-            class="btn01"
-            type="submit"
-            v-bind:class="{ signup_btn: !condition_agree }"
-          >
-            新規登録
-          </button>
+          <button class="btn01" type="submit">新規登録</button>
         </div>
         <hr class="dot_g" />
         <div class="center">
@@ -62,6 +60,8 @@
 </template>
 <script>
 import { ref } from "vue";
+import { useField, useForm } from "vee-validate";
+import * as yup from "yup";
 import axios from "axios";
 import Loader from "@/components/common/layer/loader.vue";
 
@@ -71,135 +71,80 @@ export default {
   },
   data() {
     return {
-      condition_agree: false,
-      errors: [],
-      message: "",
-      show_error: false,
-
-      //登録メール送信成功フラグ
-      is_success: false,
+      // condition_agree: false,
+      // //errors: [],
+      // message: "",
+      // show_error: false,
+      // //登録メール送信成功フラグ
+      // is_success: false,
     };
   },
-  methods: {
-    check_agree: function () {
-      this.condition_agree = !this.condition_agree;
-    },
-    show_message: function (message) {
-      this.errors = message;
-      this.show_error = true;
-    },
-    // submit_registration: function () {
-    //   let error_array = [];
 
-    //   if (this.user_nickname == "") {
-    //     error_array.push("ニックネームを入力してください");
-    //   }
-
-    //   if (this.user_email == "") {
-    //     error_array.push("メールアドレスを入力してください");
-    //   } else if (this.user_email.length > 100) {
-    //     error_array.push(i18n.tc("erroremailnum"));
-    //   } else {
-    //     let regexp =
-    //       /^[A-Za-z0-9]{1}[A-Za-z0-9\+_.-]*@{1}[A-Za-z0-9_.-]{1,}\.[A-Za-z0-9]{1,}$/;
-    //     if (!regexp.test(this.user_email)) {
-    //       error_array.push(i18n.tc("erroremailformat"));
-    //     }
-    //   }
-
-    //   if (this.user_password == "") {
-    //     error_array.push(i18n.tc("errorpassword"));
-    //   } else if (this.user_password.length > 20) {
-    //     error_array.push(i18n.tc("errorpasswordnum"));
-    //   } else if (this.user_password != this.user_confirm_password) {
-    //     error_array.push(i18n.tc("errorpasswordnotsame"));
-    //   }
-
-    //   //      if (this.user_password == "") {
-    //   //        error_array.push("・" + i18n.tc("errorpassword"));
-    //   //      } else if (this.user_password.length > 20) {
-    //   //        error_array.push("・" + i18n.tc("errorpasswordnum"));
-    //   //      } else if (this.user_password != this.user_confirm_password) {
-    //   //        error_array.push("・" + i18n.tc("errorpasswordnotsame"));
-    //   //      }
-
-    //   if (!this.condition_agree) {
-    //     error_array.push(i18n.tc("errornocheckterm"));
-    //   }
-    //   if (error_array.length) {
-    //     this.show_message(error_array);
-    //     return;
-    //   }
-
-    //   this.$axios
-    //     .$post("/liver/registration", {
-    //       email: this.user_email,
-    //       nick_name: this.user_nickname,
-    //       production_id: 1,
-    //       introducer_id: this.$route.query.i ? this.$route.query.i : 0,
-    //       campaign_id: this.campaign_id ? this.campaign_id : 0,
-    //       password: this.user_password,
-    //       password_confirm: this.user_confirm_password,
-    //     })
-    //     .then((res) => {
-    //       var message =
-    //         i18n.tc("message01") +
-    //         "<br />" +
-    //         i18n.tc("message02") +
-    //         "<br />" +
-    //         i18n.tc("message03");
-
-    //       this.message = message;
-
-    //       this.is_success = true;
-    //     })
-    //     .catch((e) => {
-    //       console.log("axiosエラー" + e);
-    //       if (e.response) {
-    //         switch (e.response.status) {
-    //           case 409:
-    //             error_array.push(e.response.data.error.desc);
-    //             this.show_message(error_array);
-    //             this.error_proc(e.response.data.error.desc);
-    //             break;
-
-    //           default:
-    //             this.error_proc(i18n.tc("passwerrorsystemerrorord") + e);
-    //             break;
-    //         }
-    //       } else {
-    //         this.error_proc(e);
-    //       }
-    //     })
-    //     .finally(() => {
-    //       this.nowLoading = false;
-    //     });
-    // },
-    // error_proc: function (e) {
-    //   console.log(e);
-    // },
-  },
-
-  setup(props, context) {
-    // v-modelからフォームに入力された値を格納
-    const nick_name = ref("");
-    const email = ref("");
-    const password = ref("");
-    const confirm_password = ref("");
+  setup() {
+    //送信ボタンを押すとメッセージ表示
+    const submit_flag = ref(false);
+    //ローディングの値
     const nowLoading = ref(false);
+    //会員登録完了
+    const is_success = ref(false);
+    //エラーメッセージ
+    const error_message = ref("");
+
+    //バリデーションしつつフォームから値を格納
+    const schema = yup.object({
+      nick_name: yup.string().required("ニックネームは必須の項目です"),
+      email: yup
+        .string()
+        .required("メールアドレスは必須の項目です")
+        .email("メールアドレスが不正です"),
+      password: yup.string().required("パスワードは必須項目です"),
+      confirm_password: yup.string().required("パスワード確認は必須項目です"),
+    });
+
+    const { errors } = useForm({
+      validationSchema: schema,
+    });
+
+    const { value: nick_name } = useField("nick_name");
+    const { value: email } = useField("email");
+    const { value: password } = useField("password");
+    const { value: confirm_password } = useField("confirm_password");
 
     const submit = async () => {
-      nowLoading.value = true;
-      // Register apiへPOSTリクエスト
-      await axios.post("register", {
-        nick_name: nick_name.value,
-        email: email.value,
-        password: password.value,
-        password_confirm: confirm_password.value,
-      });
-      nowLoading.value = false;
-      // モーダルを消す
-      await context.emit("modal_off");
+      submit_flag.value = true;
+      if (
+        nick_name.value &&
+        email.value &&
+        password.value &&
+        confirm_password.value &&
+        !errors.value.nick_name &&
+        !errors.value.email &&
+        !errors.value.password &&
+        !errors.value.confirm_password
+      ) {
+        nowLoading.value = true;
+        // Register apiへPOSTリクエスト
+        await axios
+          .post("register", {
+            nick_name: nick_name.value,
+            email: email.value,
+            password: password.value,
+            password_confirm: confirm_password.value,
+          })
+          .then((res) => {
+            submit_flag.value = false;
+            console.log(res);
+
+            is_success.value = true;
+          })
+          .catch((e) => {
+            console.log("axiosエラー e:" + e);
+            error_message.value = e.response.data.message;
+          })
+          .finally(() => {
+            nowLoading.value = false;
+          });
+      }
     };
 
     return {
@@ -207,16 +152,29 @@ export default {
       email,
       password,
       confirm_password,
+      error_message,
+      errors,
+      submit_flag,
       nowLoading,
+      is_success,
       submit,
     };
   },
 };
 </script>
 <style scoped>
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.li {
+  padding: 0;
+  margin: 0;
+}
 ul#error_message {
   margin-top: 1em;
-  text-align: left;
+  text-align: center;
   color: red;
 }
 .signup_btn {

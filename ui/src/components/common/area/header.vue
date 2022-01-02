@@ -164,7 +164,15 @@
       <ul class="nav__wrapper" v-if="!user_id">
         <li class="nav__item">
           <a href="#">
-            <button class="btn01">ログイン</button>
+            <button
+              class="btn01"
+              v-on:click="
+                modal_kind = 'login';
+                modal_switch.login++;
+              "
+            >
+              ログイン
+            </button>
           </a>
         </li>
         <li class="nav__item">
@@ -191,6 +199,8 @@
 </template>
 <script>
 import LoginRegistResetModal from "@/components/common/modal/login_regster_reset.vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 export default {
   components: {
     LoginRegistResetModal,
@@ -198,7 +208,6 @@ export default {
   props: [],
   data() {
     return {
-      user_id: "",
       modal_kind: false,
       modal_switch: {
         login: 0,
@@ -214,8 +223,23 @@ export default {
 
   methods: {
     init: async function () {},
+  },
 
-    regist_modal_on() {},
+  setup() {
+    const user_id = ref("");
+
+    onMounted(async () => {
+      // user情報を取得
+      // ログイン情報は、Cookieに保存してあるので、
+      // リクエストするだけでOK
+      const { data } = await axios.get("user");
+
+      user_id.value = data.ID;
+    });
+
+    return {
+      user_id,
+    };
   },
 };
 </script>

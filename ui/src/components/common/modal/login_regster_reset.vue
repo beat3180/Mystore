@@ -34,13 +34,13 @@
 </template>
 
 <script>
-//import LoginModal from "@/components/common/modal/login.vue";
+import LoginModal from "@/components/common/modal/login.vue";
 import RegistModal from "@/components/common/modal/register.vue";
 //import PasswordResetModal from "@/components/common/modal/password_reset.vue";
 export default {
   props: ["modal_switch", "modal_kind"],
   components: {
-    //LoginModal,
+    LoginModal,
     RegistModal,
     //PasswordResetModal,
   },
@@ -56,9 +56,11 @@ export default {
         this.is_modal = false;
         return;
       }
+
       this.is_modal = true;
     },
     modal_kind: function () {
+      console.log(12345);
       this.modal_type = this.modal_kind;
     },
   },
