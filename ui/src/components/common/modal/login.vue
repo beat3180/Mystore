@@ -101,6 +101,8 @@ export default {
             console.log(res);
 
             context.emit("modal_off");
+            //リロード
+            document.location.reload();
           })
           .catch((e) => {
             console.log("axiosエラー e:" + e);

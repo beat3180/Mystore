@@ -4,7 +4,7 @@
       <div class="mystore">
         <router-link class="router_link" to="/">Mystore</router-link>
       </div>
-      <ul class="nav__wrapper" v-if="user_id">
+      <ul class="nav__wrapper" v-if="auth">
         <li class="nav__item active">
           <a href="#">
             <div>
@@ -160,8 +160,13 @@
             </div>
           </a>
         </li>
+        <li class="nav__item">
+          <a href="#">
+            <button class="btn02" @click="logout">ログアウト</button>
+          </a>
+        </li>
       </ul>
-      <ul class="nav__wrapper" v-if="!user_id">
+      <ul class="nav__wrapper" v-if="!auth">
         <li class="nav__item">
           <a href="#">
             <button
@@ -199,7 +204,9 @@
 </template>
 <script>
 import LoginRegistResetModal from "@/components/common/modal/login_regster_reset.vue";
-import { ref, onMounted } from "vue";
+import { computed } from "vue";
+import { useStore } from "vuex";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 export default {
   components: {
@@ -226,19 +233,26 @@ export default {
   },
 
   setup() {
-    const user_id = ref("");
-
-    onMounted(async () => {
-      // user情報を取得
-      // ログイン情報は、Cookieに保存してあるので、
-      // リクエストするだけでOK
-      const { data } = await axios.get("user");
-
-      user_id.value = data.ID;
-    });
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+    const auth = computed(() => store.state.auth);
+    const logout = async () => {
+      await axios.get("logout", {});
+      store.dispatch("setAuth", false);
+      if (route.path == "/") {
+        //リロード
+        await document.location.reload();
+      }
+      //その他の場合はTOPページへ
+      else {
+        router.push("/");
+      }
+    };
 
     return {
-      user_id,
+      auth,
+      logout,
     };
   },
 };
@@ -273,6 +287,23 @@ a {
 .btn01:hover {
   background-color: #fff;
   color: #303030;
+}
+
+.btn02 {
+  padding: 3px 10px;
+  min-width: 120px;
+  border: 3px solid #0000ff;
+  border-radius: 100px;
+  background-color: #fff;
+  color: #303030;
+  font-weight: bold;
+  transition-duration: 0.3s;
+  cursor: pointer;
+}
+
+.btn02:hover {
+  background-color: #0000ff;
+  color: #fff;
 }
 
 .router_link {

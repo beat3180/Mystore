@@ -1,11 +1,11 @@
 <template>
   <section id="wrapper">
-    <div id="main">aaaa{{ user_id }}</div>
+    <div id="main">aaaa</div>
   </section>
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { onMounted } from "vue";
 import axios from "axios";
 import { useStore } from "vuex";
 
@@ -28,7 +28,6 @@ export default {
   },
 
   setup() {
-    const user_id = ref("");
     const store = useStore();
 
     onMounted(async () => {
@@ -37,17 +36,16 @@ export default {
         // ログイン情報は、Cookieに保存してあるので、
         // リクエストするだけでOK
         const { data } = await axios.get("user");
-        user_id.value = data.ID;
         // actionsに設定したパラメータ名を設定
         await store.dispatch("setAuth", true);
+        await store.dispatch("setUserId", data.ID);
       } catch (e) {
         await store.dispatch("setAuth", false);
+        await store.dispatch("setUserId", 0);
       }
     });
 
-    return {
-      user_id,
-    };
+    return {};
   },
 };
 </script>
