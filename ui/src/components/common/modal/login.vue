@@ -15,10 +15,10 @@
       <div class="center b10">
         <button class="btn01" type="submit" @click="submit">ログイン</button>
       </div>
-      <div class="center b10">
+      <div class="center">
         <span class="mini_link">
           <span class="finger" v-on:click="$emit('modal_change', 'password')"
-            >パスワードを忘れた場合</span
+            >パスワードを忘れた</span
           >
         </span>
       </div>
@@ -211,5 +211,12 @@ ul#error_message {
 .btn02:hover {
   background-color: #0000ff;
   color: #fff;
+}
+
+.mini_link {
+  font-size: 0.8em;
+  font-weight: bold;
+  color: #0000ff;
+  cursor: pointer;
 }
 </style>

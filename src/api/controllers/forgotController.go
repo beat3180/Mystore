@@ -19,6 +19,27 @@ func Forgot(c *fiber.Ctx) error {
 		return err
 	}
 
+	// メールアドレスチェック
+	if data["email"] != data["email_confirm"] {
+		c.Status(400)
+		return c.JSON(fiber.Map{
+			"message": "メールアドレスが一致しません",
+		})
+	}
+
+	//DBのユーザーデータ
+	var user models.User
+
+	// emailに紐づくユーザーを取得
+	// &userを指定することでDBから取得したデータを直接格納できる
+	database.DB.Where("email = ?", data["email"]).First(&user)
+	if user.Email != data["email"] {
+		c.Status(400)
+		return c.JSON(fiber.Map{
+			"message": "登録されているメールアドレスと違います",
+		})
+	}
+
 	token := RandStringRunes(12)
 	passwordReset := models.PasswordReset{
 		Email: data["email"],
@@ -68,7 +89,7 @@ func Reset(c *fiber.Ctx) error {
 	if data["password"] != data["password_confirm"] {
 		c.Status(400)
 		return c.JSON(fiber.Map{
-			"message": "Passwords do not match!",
+			"message": "パスワードが一致しません",
 		})
 	}
 

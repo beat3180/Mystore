@@ -1,19 +1,46 @@
 <template>
-  <global-header />
-  <index-page />
-  <global-footer />
   <router-view />
 </template>
 <script>
-import GlobalHeader from "./components/common/area/header.vue";
-import GlobalFooter from "./components/common/area/footer.vue";
-import IndexPage from "./pages/index.vue";
+import { onMounted } from "vue";
+import axios from "axios";
+import { useStore } from "vuex";
 
 export default {
-  components: {
-    GlobalHeader,
-    GlobalFooter,
-    IndexPage,
+  head() {
+    return {
+      title: "Top",
+    };
+  },
+  data() {
+    return {};
+  },
+  mounted() {
+    this.init();
+  },
+  methods: {
+    init: async function () {},
+  },
+
+  setup() {
+    const store = useStore();
+
+    onMounted(async () => {
+      try {
+        // user情報を取得
+        // ログイン情報は、Cookieに保存してあるので、
+        // リクエストするだけでOK
+        const { data } = await axios.get("user");
+        // actionsに設定したパラメータ名を設定
+        await store.dispatch("setAuth", true);
+        await store.dispatch("setUserId", data.ID);
+      } catch (e) {
+        await store.dispatch("setAuth", false);
+        await store.dispatch("setUserId", 0);
+      }
+    });
+
+    return {};
   },
 };
 </script>

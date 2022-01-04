@@ -1,20 +1,15 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Index from '../pages/index.vue'
+import Reset from '../pages/join/reset.vue'
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
-    path: '/index',
+    path: '/',
     name: 'Index',
     component: Index
   },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
+  { path: '/reset/:token', component: Reset},
+
 
 ]
 

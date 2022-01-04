@@ -36,13 +36,13 @@
 <script>
 import LoginModal from "@/components/common/modal/login.vue";
 import RegistModal from "@/components/common/modal/register.vue";
-//import PasswordResetModal from "@/components/common/modal/password_reset.vue";
+import PasswordResetModal from "@/components/common/modal/password_reset.vue";
 export default {
   props: ["modal_switch", "modal_kind"],
   components: {
     LoginModal,
     RegistModal,
-    //PasswordResetModal,
+    PasswordResetModal,
   },
   data() {
     return {

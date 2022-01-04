@@ -1,16 +1,21 @@
 <template>
   <section id="wrapper">
+    <Header ref="header_area" />
     <div id="main">aaaa</div>
+    <Footer ref="footer_area" />
   </section>
 </template>
 
 <script>
-import { onMounted } from "vue";
-import axios from "axios";
-import { useStore } from "vuex";
+import Header from "@/components/common/area/header.vue";
+import Footer from "@/components/common/area/footer.vue";
 
 export default {
   name: "Index",
+  components: {
+    Header,
+    Footer,
+  },
 
   head() {
     return {
@@ -25,27 +30,6 @@ export default {
   },
   methods: {
     init: async function () {},
-  },
-
-  setup() {
-    const store = useStore();
-
-    onMounted(async () => {
-      try {
-        // user情報を取得
-        // ログイン情報は、Cookieに保存してあるので、
-        // リクエストするだけでOK
-        const { data } = await axios.get("user");
-        // actionsに設定したパラメータ名を設定
-        await store.dispatch("setAuth", true);
-        await store.dispatch("setUserId", data.ID);
-      } catch (e) {
-        await store.dispatch("setAuth", false);
-        await store.dispatch("setUserId", 0);
-      }
-    });
-
-    return {};
   },
 };
 </script>
