@@ -1,6 +1,6 @@
 <template>
   <div v-if="is_modal" class="modal">
-    <div class="modal_background" v-on:click="is_modal = false"></div>
+    <div class="modal_background" v-on:click="modal_off"></div>
     <div class="modal_inner">
       <div class="modal_msg center">
         <div class="modal_form_wrap">
@@ -60,7 +60,6 @@ export default {
       this.is_modal = true;
     },
     modal_kind: function () {
-      console.log(12345);
       this.modal_type = this.modal_kind;
     },
   },

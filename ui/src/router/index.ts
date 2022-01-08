@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Index from '../pages/index.vue'
 import Reset from '../pages/join/reset.vue'
+import Post from '../pages/post.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -8,7 +9,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Index',
     component: Index
   },
-  { path: '/reset/:token', component: Reset},
+  { path: '/reset/:token', component: Reset },
+  {
+    path: '/post',
+    name: 'Post',
+    component: Post
+  },
 
 
 ]

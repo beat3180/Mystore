@@ -66,7 +66,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     const auth = computed(() => store.state.auth);
-
+    //ログインチェック
     watchEffect(() => {
       if (auth.value == true) {
         router.push("/");
