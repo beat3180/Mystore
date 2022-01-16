@@ -29,6 +29,6 @@ func Connect() {
 	// コネクション情報を追加
 	DB = connection
 
-	connection.AutoMigrate(&models.User{}, &models.PasswordReset{}) // 追加
+	connection.AutoMigrate(&models.User{}, &models.PasswordReset{}, &models.Post{}) // 追加
 
 }

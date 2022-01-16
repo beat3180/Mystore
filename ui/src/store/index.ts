@@ -1,14 +1,19 @@
 import { Commit, createStore } from 'vuex'
+import { number } from 'yup'
 
 export default createStore({
   state: {
     auth: false,
-    user_id: 0
+    user_id: 0,
+    user: [{
+      user_id: "",
+      nick_name: "",
+      email: "",
+    }]
   },
   mutations: {
     setAuth: (state: { auth: boolean }, auth: boolean) => state.auth = auth,
-    setUserId: (state: { user_id: number}, user_id: number) => state.user_id = user_id
-
+    setUserId: (state: { user_id: number }, user_id: number) => state.user_id = user_id,
   },
   actions: {
     // ログイン済みかどうかの状態を管理する

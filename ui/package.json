@@ -18,6 +18,7 @@
     "vue-class-component": "^8.0.0-0",
     "vue-google-autocomplete": "^1.1.2",
     "vue-router": "^4.0.0-0",
+    "vue2-dropzone": "^3.6.0",
     "vue3-geolocation": "^1.0.0",
     "vuejs3-google-maps": "^0.2.1",
     "vuex": "^4.0.0-0",

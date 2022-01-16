@@ -1,8 +1,17 @@
 <template>
   <section id="wrapper">
     <Header ref="header_area" />
-    <div>
+    <div class="post_container">
+      <h1>Mystoreの投稿</h1>
+      <h2>お店の名前(必須)</h2>
+      <input class="title_text" type="text" v-model="title" />
+      <h2>コメント</h2>
+      <textarea rows="10" cols="60" v-model="comment"></textarea>
+      <h2>画像</h2>
+      <input type="file" v-on:change="fileSelected" />
+      <h2>お店の場所(必須)</h2>
       <vue-google-autocomplete
+        class="gmap_text"
         id="map"
         classname="form-control"
         placeholder="住所を入力してください"
@@ -11,8 +20,13 @@
       >
       </vue-google-autocomplete>
 
-      <button type="button" @click="getlatlng">検索</button>
-      <div id="gmap" style="height: 500px; width: 800px"></div>
+      <button type="button" @click="getlatlng">お店を検索</button>
+      <div class="gmap_container">
+        <div id="gmap" class="gmap" style="height: 500px; width: 800px"></div>
+      </div>
+    </div>
+    <div>
+      <button v-on:click="mystore_post">投稿</button>
     </div>
 
     <Footer ref="footer_area" />
@@ -23,6 +37,7 @@
 import Header from "@/components/common/area/header.vue";
 import Footer from "@/components/common/area/footer.vue";
 import VueGoogleAutocomplete from "vue-google-autocomplete";
+import axios from "axios";
 
 export default {
   name: "Index",
@@ -39,10 +54,15 @@ export default {
   },
   data() {
     return {
-      // map: {},
-      // marker: null,
-      //geocoder: {},
-      // address: "",
+      public_flag: true,
+      comment: "",
+      title: "",
+      address: "",
+      lng: "",
+      lat: "",
+      fileInfo: "",
+      user: "",
+      showImage: false,
       map: {},
       geocoder: {},
       label_name: "",
@@ -73,6 +93,51 @@ export default {
 
   methods: {
     init: async function () {},
+    fileSelected(event) {
+      console.log(event);
+      this.fileInfo = event.target.files[0];
+
+      // {
+      //     title: this.title,
+      //     comment: this.comment,
+      //     lng: this.lng,
+      //     lat: this.lat,
+      //     address: this.address,
+      //     public_flag: this.public_flag,
+      //   }
+    },
+    mystore_post() {
+      const posts = {
+        title: this.title,
+        comment: this.comment,
+        lng: this.lng,
+        lat: this.lat,
+        address: this.address,
+        public_flag: this.public_flag,
+      };
+      const formData = new FormData();
+
+      formData.append("file", this.fileInfo);
+      const postsData = JSON.stringify(posts);
+      formData.append("postsData", postsData);
+      // formData.append("title", this.title);
+      // formData.append("comment", this.comment);
+      // formData.append("lng", this.lng);
+      // formData.append("lat", this.lat);
+      // formData.append("address", this.address);
+      // formData.append("public_flag", this.public_flag);
+
+      axios
+        .post("/post", formData, {
+          headers: {
+            "content-type": "multipart/form-data",
+          },
+        })
+        .then((res) => {
+          console.log(res);
+        });
+    },
+
     getlatlng() {
       var vm = this;
       let adrs = this.address_search;
@@ -99,6 +164,7 @@ export default {
             address: adrs,
           },
           function (results, status) {
+            console.log(results);
             if (status == window.google.maps.GeocoderStatus.OK) {
               if (results[0].geometry) {
                 vm.map.setCenter(results[0].geometry.location);
@@ -107,8 +173,11 @@ export default {
 
                 // 緯度経度を取得
                 var latlng = results[0].geometry.location;
+
+                vm.lat = results[0].geometry.location.lat();
+                vm.lng = results[0].geometry.location.lng();
                 // 住所を取得(日本の場合だけ「日本, 」を削除)
-                var address = results[0].formatted_address.replace(
+                vm.address = results[0].formatted_address.replace(
                   /^日本、/,
                   ""
                 );
@@ -150,7 +219,7 @@ export default {
                 vm.marker.setMap(vm.map);
 
                 let infoWindow = new window.google.maps.InfoWindow({
-                  content: address + "<br />" + latlng.toString(),
+                  content: vm.address + "<br />" + latlng.toString(),
                 });
                 vm.marker.addListener("click", function () {
                   infoWindow.open(vm.map, vm.marker);
@@ -209,4 +278,45 @@ export default {
 </script>
 
 <style scoped>
+.post_container {
+  width: 100%;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.gmap {
+  margin: 0 auto;
+}
+
+.background_white {
+  background-color: white;
+}
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 2px solid #ddd; /*枠線*/
+}
+
+.title_text {
+  max-width: 500px;
+  height: 40px;
+  width: 100%;
+  font-size: 20px;
+  border: 2px solid #ddd; /*枠線*/
+  box-sizing: border-box; /*横幅の解釈をpadding, borderまでとする*/
+}
+.gmap_text {
+  max-width: 300px;
+  width: 100%;
+  border: 2px solid #ddd;
+  box-sizing: border-box;
+}
+/* .comment_text {
+  max-width: 500px;
+  height: 100px;
+  width: 100%;
+  border: 2px solid #ddd;
+  box-sizing: border-box;
+}*/
 </style>
