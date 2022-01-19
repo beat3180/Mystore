@@ -5,11 +5,7 @@ export default createStore({
   state: {
     auth: false,
     user_id: 0,
-    user: [{
-      user_id: "",
-      nick_name: "",
-      email: "",
-    }]
+
   },
   mutations: {
     setAuth: (state: { auth: boolean }, auth: boolean) => state.auth = auth,

@@ -7,7 +7,7 @@
       <input class="title_text" type="text" v-model="title" />
       <h2>コメント</h2>
       <textarea rows="10" cols="60" v-model="comment"></textarea>
-      <h2>画像</h2>
+      <h2>画像(必須)</h2>
       <input type="file" v-on:change="fileSelected" />
       <h2>お店の場所(必須)</h2>
       <vue-google-autocomplete
@@ -92,7 +92,15 @@ export default {
   },
 
   methods: {
-    init: async function () {},
+    init: async function () {
+      await this.get_user();
+    },
+    get_user() {
+      axios.get("/user").then((res) => {
+        this.user = res.data;
+        console.log(this.user);
+      });
+    },
     fileSelected(event) {
       console.log(event);
       this.fileInfo = event.target.files[0];
@@ -108,6 +116,7 @@ export default {
     },
     mystore_post() {
       const posts = {
+        user_id: this.user.ID === undefined ? 0 : this.user.ID,
         title: this.title,
         comment: this.comment,
         lng: this.lng,
@@ -120,12 +129,6 @@ export default {
       formData.append("file", this.fileInfo);
       const postsData = JSON.stringify(posts);
       formData.append("postsData", postsData);
-      // formData.append("title", this.title);
-      // formData.append("comment", this.comment);
-      // formData.append("lng", this.lng);
-      // formData.append("lat", this.lat);
-      // formData.append("address", this.address);
-      // formData.append("public_flag", this.public_flag);
 
       axios
         .post("/post", formData, {

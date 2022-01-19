@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -16,10 +15,12 @@ func Post(c *fiber.Ctx) error {
 
 	// json情報の取得
 	postData := c.FormValue("postsData")
-	spew.Dump(postData)
 	var data map[string]interface{}
-	json.Unmarshal([]byte(postData), &data)
-
+	//json情報をパースする
+	if err := json.Unmarshal([]byte(postData), &data); err != nil {
+		return err
+	}
+	//spew.Dump(postData)
 	// //リクエストデータをパースする
 	// if err := postData.BodyParser(&data); err != nil {
 	// 	return err
@@ -28,7 +29,6 @@ func Post(c *fiber.Ctx) error {
 	// ファイルを取得
 	file, err := c.FormFile("file")
 	if err != nil {
-
 		c.Status(400)
 		return c.JSON(fiber.Map{
 			"message": "ファイルがありません",
@@ -83,17 +83,18 @@ func Post(c *fiber.Ctx) error {
 			"message": "ファイルの保存に失敗しました",
 		})
 	}
+	//型をintとしてキャスト
+	user_id := int(data["user_id"].(float64))
 
-	// _, ok := data["title"].(string)
-	// if ok != true {
-	// 	c.Status(400)
-	// 	return c.JSON(fiber.Map{
-	// 		"message": "お店の名前は必須項目です",
-	// 	})
-	// }
+	// _, ok := data["user_id"].(float64)
+	// if ok != false {
+	//var user_id = int(data["user_id"].(float64))
+
+	//}
 
 	post := models.Post{
 		ImagePath:  file_path,
+		UserId:     user_id,
 		Title:      data["title"].(string),
 		Comment:    data["comment"].(string),
 		Lng:        data["lng"].(float64),
