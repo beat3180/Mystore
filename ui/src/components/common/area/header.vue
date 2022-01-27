@@ -99,7 +99,7 @@
           </router-link>
         </li>
         <li class="nav__item" v-if="auth">
-          <a href="#">
+          <div class="router_link" v-on:click="get_mysrore">
             <div>
               <svg
                 viewBox="0 0 24 24"
@@ -127,7 +127,7 @@
             <div>
               <span>お店管理</span>
             </div>
-          </a>
+          </div>
         </li>
         <!-- <li class="nav__item">
           <a href="#">
@@ -238,6 +238,7 @@ export default {
     const route = useRoute();
     const auth = computed(() => store.state.auth);
     const nick_name = ref("");
+    const user_id = ref("");
 
     onMounted(async () => {
       try {
@@ -246,10 +247,14 @@ export default {
         // リクエストするだけでOK
         const { data } = await axios.get("user");
         nick_name.value = data.nick_name;
+        user_id.value = data.ID;
       } catch (e) {
         console.log(e);
       }
     });
+    const get_mysrore = async () => {
+      router.push("/mystore/id=" + user_id.value);
+    };
     const logout = async () => {
       await axios.get("logout", {});
       store.dispatch("setAuth", false);
@@ -265,8 +270,10 @@ export default {
 
     return {
       auth,
+      user_id,
       nick_name,
       logout,
+      get_mysrore,
     };
   },
 };
@@ -326,6 +333,7 @@ span {
 .router_link {
   text-decoration: none;
   color: black;
+  cursor: pointer;
 }
 .nav {
   display: grid;

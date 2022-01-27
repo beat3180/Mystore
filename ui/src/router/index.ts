@@ -2,7 +2,8 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Index from '../pages/index.vue'
 import Reset from '../pages/join/reset.vue'
 import Post from '../pages/post.vue'
-
+import Content from '../pages/content.vue'
+import MyStore from '../pages/mystore.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -14,6 +15,16 @@ const routes: Array<RouteRecordRaw> = [
     path: '/post',
     name: 'Post',
     component: Post
+  },
+  {
+    path: '/content/:id',
+    name: 'Content',
+    component: Content
+  },
+  {
+    path: '/mystore/:id',
+    name: 'MyStore',
+    component: MyStore
   },
 
 

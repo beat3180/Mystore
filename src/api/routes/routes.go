@@ -14,4 +14,8 @@ func Setup(app *fiber.App) {
 	app.Post("/api/forgot", controllers.Forgot)
 	app.Post("/api/reset", controllers.Reset)
 	app.Post("/api/post", controllers.Post)
+	app.Get("/api/post/get", controllers.GetPost)
+	app.Get("/api/post/get/content/:id", controllers.GetPostID)
+	app.Post("/api/post/get/mystore", controllers.GetMystoreID)
+	//app.Get("/api/post/image/get", controllers.GetImage)
 }

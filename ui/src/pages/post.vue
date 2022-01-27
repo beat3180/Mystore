@@ -3,12 +3,16 @@
     <Header ref="header_area" />
     <div class="post_container">
       <h1>Mystoreの投稿</h1>
+      <p v-if="error_message" class="red_text">{{ error_message }}</p>
       <h2>お店の名前(必須)</h2>
       <input class="title_text" type="text" v-model="title" />
       <h2>コメント</h2>
       <textarea rows="10" cols="60" v-model="comment"></textarea>
       <h2>画像(必須)</h2>
       <input type="file" v-on:change="fileSelected" />
+      <div>
+        <img class="image" :src="url" v-show="url" />
+      </div>
       <h2>お店の場所(必須)</h2>
       <vue-google-autocomplete
         class="gmap_text"
@@ -25,8 +29,8 @@
         <div id="gmap" class="gmap" style="height: 500px; width: 800px"></div>
       </div>
     </div>
-    <div>
-      <button v-on:click="mystore_post">投稿</button>
+    <div class="center">
+      <button class="btn01 button" v-on:click="mystore_post">投稿</button>
     </div>
 
     <Footer ref="footer_area" />
@@ -40,7 +44,7 @@ import VueGoogleAutocomplete from "vue-google-autocomplete";
 import axios from "axios";
 
 export default {
-  name: "Index",
+  name: "Post",
   components: {
     Header,
     Footer,
@@ -54,6 +58,8 @@ export default {
   },
   data() {
     return {
+      url: "",
+      error_message: "",
       public_flag: true,
       comment: "",
       title: "",
@@ -96,23 +102,20 @@ export default {
       await this.get_user();
     },
     get_user() {
-      axios.get("/user").then((res) => {
-        this.user = res.data;
-        console.log(this.user);
-      });
+      axios
+        .get("/user")
+        .then((res) => {
+          this.user = res.data;
+          console.log(this.user);
+        })
+        .catch((e) => {
+          console.log("axiosエラー e:" + e);
+        });
     },
+    //ファイル情報取得
     fileSelected(event) {
-      console.log(event);
       this.fileInfo = event.target.files[0];
-
-      // {
-      //     title: this.title,
-      //     comment: this.comment,
-      //     lng: this.lng,
-      //     lat: this.lat,
-      //     address: this.address,
-      //     public_flag: this.public_flag,
-      //   }
+      this.url = URL.createObjectURL(this.fileInfo);
     },
     mystore_post() {
       const posts = {
@@ -124,8 +127,17 @@ export default {
         address: this.address,
         public_flag: this.public_flag,
       };
-      const formData = new FormData();
+      if (
+        !this.title ||
+        !this.lng ||
+        !this.lat ||
+        !this.address ||
+        !this.fileInfo
+      ) {
+        return (this.error_message = "必須項目に入力がありません");
+      }
 
+      const formData = new FormData();
       formData.append("file", this.fileInfo);
       const postsData = JSON.stringify(posts);
       formData.append("postsData", postsData);
@@ -138,6 +150,12 @@ export default {
         })
         .then((res) => {
           console.log(res);
+          //トップページに戻る
+          this.$router.push("/");
+        })
+        .catch((e) => {
+          console.log("axiosエラー e:" + e);
+          this.error_message = e.response.data.message;
         });
     },
 
@@ -281,6 +299,9 @@ export default {
 </script>
 
 <style scoped>
+.red_text {
+  color: red;
+}
 .post_container {
   width: 100%;
   text-align: center;
@@ -314,6 +335,33 @@ export default {
   width: 100%;
   border: 2px solid #ddd;
   box-sizing: border-box;
+}
+
+.btn01 {
+  padding: 3px 10px;
+  min-width: 120px;
+  border: 3px solid #0000ff;
+  border-radius: 100px;
+  background-color: #0000ff;
+  color: #fff;
+  font-weight: bold;
+  transition-duration: 0.3s;
+  cursor: pointer;
+}
+
+.btn01:hover {
+  background-color: #fff;
+  color: #303030;
+}
+.center {
+  margin: 0 auto;
+  text-align: center;
+}
+.button {
+  margin: 30px 0px;
+}
+.image {
+  height: 200px;
 }
 /* .comment_text {
   max-width: 500px;
