@@ -62,8 +62,6 @@ export default {
       await this.get_post_id();
       //Googleマップを取得
       await this.get_gmap();
-
-      console.log(this.my_store.Lng);
     },
     get_post_id: async function () {
       await axios

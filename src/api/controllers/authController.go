@@ -3,9 +3,11 @@ package controllers
 import (
 	"api/database"
 	"api/models"
+	"runtime"
 	"strconv"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -18,6 +20,13 @@ type Claims struct {
 func User(c *fiber.Ctx) error {
 	// CookieからJWTを取得
 	cookie := c.Cookies("jwt") // Loginで保存したもの
+
+	if cookie == "" {
+		//クッキーがない場合処理を中断
+		runtime.Goexit()
+	}
+	spew.Dump(cookie)
+
 	// token取得
 	token, err := jwt.ParseWithClaims(cookie, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil

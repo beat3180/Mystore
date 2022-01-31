@@ -38,4 +38,7 @@ ul {
   padding: 20px 10px;
   background-color: #d9f0f7;
 }
+.mystore {
+  font-weight: bold;
+}
 </style>

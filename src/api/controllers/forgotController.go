@@ -67,7 +67,6 @@ func Forgot(c *fiber.Ctx) error {
 		to,
 		[]byte(sendFrom+subject+mime+message),
 	)
-
 	if err != nil {
 		return err
 	}

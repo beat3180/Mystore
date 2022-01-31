@@ -99,7 +99,7 @@
           </router-link>
         </li>
         <li class="nav__item" v-if="auth">
-          <div class="router_link" v-on:click="get_mysrore">
+          <router-link class="router_link" to="/mystore">
             <div>
               <svg
                 viewBox="0 0 24 24"
@@ -127,7 +127,7 @@
             <div>
               <span>お店管理</span>
             </div>
-          </div>
+          </router-link>
         </li>
         <!-- <li class="nav__item">
           <a href="#">
@@ -252,9 +252,6 @@ export default {
         console.log(e);
       }
     });
-    const get_mysrore = async () => {
-      router.push("/mystore/id=" + user_id.value);
-    };
     const logout = async () => {
       await axios.get("logout", {});
       store.dispatch("setAuth", false);
@@ -273,7 +270,6 @@ export default {
       user_id,
       nick_name,
       logout,
-      get_mysrore,
     };
   },
 };

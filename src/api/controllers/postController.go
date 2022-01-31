@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -168,7 +169,7 @@ func GetPostID(c *fiber.Ctx) error {
 func GetPost(c *fiber.Ctx) error {
 
 	post := []models.Post{}
-	database.DB.Find(&post)
+	database.DB.Where("public_flag = ?", true).Find(&post)
 
 	return c.JSON(post)
 }
@@ -192,6 +193,86 @@ func GetMystoreID(c *fiber.Ctx) error {
 	// 		"message": "コンテンツが見つかりません",
 	// 	})
 	// }
+
+	return c.JSON(post)
+}
+
+//コンテンツを非公開にする
+func PublicUpdate(c *fiber.Ctx) error {
+	var data map[string]int
+
+	// リクエストデータをパースする
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	var post models.Post
+
+	if data["id"] == 0 {
+		c.Status(404)
+		return c.JSON(fiber.Map{
+			"message": "コンテンツが見つかりません",
+		})
+	}
+	// &postを指定することでDBから取得したデータを直接格納できる
+	database.DB.Where("id = ?", data["id"]).First(&post).Update("public_flag", false)
+
+	return c.JSON(post)
+}
+
+//コンテンツを公開する
+func HideUpdate(c *fiber.Ctx) error {
+	var data map[string]int
+
+	// リクエストデータをパースする
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	var post models.Post
+
+	if data["id"] == 0 {
+		c.Status(404)
+		return c.JSON(fiber.Map{
+			"message": "コンテンツが見つかりません",
+		})
+	}
+
+	// &postを指定することでDBから取得したデータを直接格納できる
+	database.DB.Where("id = ?", data["id"]).First(&post).Update("public_flag", true)
+
+	return c.JSON(post)
+}
+
+//コンテンツを削除する
+func MyStoreDelet(c *fiber.Ctx) error {
+	var data map[string]int
+
+	// リクエストデータをパースする
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	var post models.Post
+
+	if data["id"] == 0 {
+		c.Status(404)
+		return c.JSON(fiber.Map{
+			"message": "コンテンツが見つかりません",
+		})
+	}
+
+	// &postを指定することでDBから取得したデータを直接格納できる
+	database.DB.Where("id = ?", data["id"]).First(&post)
+	if err := os.Remove(post.ImagePath); err != nil {
+		c.Status(500)
+		return c.JSON(fiber.Map{
+			"message": "ファイルの削除に失敗しました",
+		})
+	}
+
+	// &postを指定することでDBから取得したデータを直接格納できる
+	database.DB.Delete(&post)
 
 	return c.JSON(post)
 }

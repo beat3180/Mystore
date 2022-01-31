@@ -90,10 +90,15 @@ export default {
     //   zoom: 8,
     // });
 
-    this.map = new window.google.maps.Map(
-      document.getElementById("gmap"),
-      this.options
-    );
+    let timer = setInterval(() => {
+      if (window.google) {
+        clearInterval(timer);
+        this.map = new window.google.maps.Map(
+          document.getElementById("gmap"),
+          this.options
+        );
+      }
+    }, 500);
     this.geocoder = new window.google.maps.Geocoder();
   },
 
@@ -101,8 +106,8 @@ export default {
     init: async function () {
       await this.get_user();
     },
-    get_user() {
-      axios
+    get_user: async function () {
+      await axios
         .get("/user")
         .then((res) => {
           this.user = res.data;
